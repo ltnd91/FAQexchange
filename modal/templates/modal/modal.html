@@ -1,0 +1,23 @@
+{% load i18n %}
+{% load static %}
+
+<div tabindex="-1" role="dialog" aria-hidden="true" id="modal-modal" class="modal-modal modal">
+    <div class="modal-loader" style="display: none;">
+        <img class="modal-loader-img" src="{% static "modal/img/loading-bars.svg" %}">
+    </div>
+    <div class="modal-dialog modal-content">
+        <div data-dismiss="modal" class="close-modal">
+            <div class="lr">
+                <div class="rl">
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-wrapper" style="display: none;">
+        <div class="modal-head"></div>
+        <div class="modal-body"></div>
+
+        </div>
+    </div>
+</div>
+

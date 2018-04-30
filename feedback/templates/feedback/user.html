@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block head_title %}{{ user.username }} | {{ block.super}}{% endblock head_title %}
+
+{% block content %}
+<div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
+        <div class='grid-item' style="text-align: left"> 
+            {% if question in is_followingContext %}
+            <p>{% include 'questions/snippet/follow_form2.html' with question=question is_following=True count=question.followers.count %}</p>
+            {% else %}
+            <p>{% include 'questions/snippet/follow_form2.html' with question=question is_following=False count=question.followers.count %}</p>
+            {% endif %}
+            <p>from: {{ question.owner }} | topic: {{ question.topic }}</p>
+        </div>
+    </div>
+        </div>
+    </div>
+<hr/>
+
+<div class='row text-center'>
+<form class='form' method='GET' action='.'>
+<input type='text' placeholder="Search.." name='q' value='{{ request.GET.q }}'>
+<button class='btn btn-default' type='submit'>Search</button>
+</form>
+</div>
+<hr/>
+
+<div class='grid-container' style="border: 2px solid rgba(255, 255, 255, 1); grid-template-columns: 2fr 5fr 5fr">
+
+{% if profiles %}
+    <div class='grid-container' style="border: 2px solid rgba(0, 255, 0, 1); grid-template-columns: auto">
+        <div class="grid-item">
+            <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllUsers %} <span class="btn btn-default btn-sm"> showFilter </span>{% else %}<span class="btn btn-success btn-sm"> showAll </span>{% endif %}</a>
+        </div>
+        
+        {% if not user.profile.showAllUsers %} 
+        {% for pro in profiles %}
+        <div class='grid-item'> 
+            <p>{{ pro.user }}</p> 
+            {% if user in pro.viewers.all %}
+            <p>{% include 'profiles/snippet/view_form2.html' with username=pro.user.username is_following=True %}</p>
+            {% else %}
+            <p>{% include 'profiles/snippet/view_form2.html' with username=pro.user.username is_following=False %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+{% else %}
+<p class='lead'>No Users Found</p>
+{% endif %}
+
+
+    <div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1); grid-template-columns: auto">
+        <div class ='grid-item' style="text-align: left">
+            <a href="{% url 'answerCreate' slug=question.slug %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger"> create an answer</span> </a>
+        </div>
+{% if answers %}
+        {% for ans in answers %}
+        <div class='grid-item' style="text-align: left"> 
+            {% if ans in is_followingContextA %}
+            <p>{% include 'feedback/snippet/follow_form.html' with answer=ans is_following=True count=ans.followers.count %}</p>
+            {% else %}
+            <p>{% include 'feedback/snippet/follow_form.html' with answer=ans is_following=False count=ans.followers.count %}</p>
+            {% endif %}
+            <p>from: {{ ans.owner }} | <a href="{% url 'answerEdit' pk=ans.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'answerDelete' pk=ans.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> | <a href="{% url 'commentCreate' pk=ans.pk %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary btn-sm"> Reply </span> </a></p>
+        </div>
+        {% endfor %}
+    
+{% else %}
+<p class='lead'>No Answers Found</p>
+{% endif %}
+    </div>
+
+    <div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
+        <div class ='grid-item' style="text-align: left">
+        </div>
+{% if comments %}
+        {% for comm in comments %}
+        <div class='grid-item' style="text-align: left"> 
+            {% if comm in is_followingContextC %}
+            <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=True count=comm.followers.count %}</p>
+            {% else %}
+            <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=False count=comm.followers.count %}</p>
+            {% endif %}
+            <p>from: {{ comm.owner }} | <a href="{% url 'commentEdit' pk=comm.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'commentDelete' pk=comm.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a></p>
+        </div>
+        {% endfor %}
+    
+{% else %}
+<p class='lead'>No Comments Found</p>
+{% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

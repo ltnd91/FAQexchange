@@ -1,0 +1,23 @@
+ <div class='row text-center'>
+    <h1>{{ request.user }}</h1> 
+    <div class='grid-container' style='grid-template-columns: auto auto auto auto'>
+        {% if request.user.is_authenticated %}
+        <div class='grid-item' style="border: 2px solid rgba(255, 0, 0, 1)">
+            <a href='{% url "topics:create" username=request.user.username %}?q='>Topics</a>
+        </div>
+        <div class='grid-item' style="border: 2px solid rgba(0, 0, 255, 1)">
+            <a href='{% url "questions:create" username=request.user.username %}?q='>Questions</a>
+        </div>
+        <div class='grid-item' style="border: 2px solid rgba(0, 255, 0, 1)">
+            <a href='{% url "profiles:detail" username=request.user.username %}?q='>Users</a>
+        </div>
+        <div class='grid-item' style="border: 2px solid rgba(0, 0, 0, 1)">
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+        {% else %}
+        <div class='grid-item' style="border: 2px solid rgba(0, 0, 0, 1)">
+            <a>Login</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
