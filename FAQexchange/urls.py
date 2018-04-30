@@ -7,7 +7,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from profiles.views import ProfileFollowToggle, ProfileViewToggle, ProfileViewToggle2
 from topics.views import TopicFollowToggle, TopicViewToggle, TopicAjaxCreateView
 from questions.views import QuestionFollowToggle, QuestionFollowToggle2, QuestionAjaxCreateView, QuestionAjaxUpdateView, QuestionAjaxUpdateView2, QuestionAjaxDeleteView
-from feedback.views import AnswerAjaxCreateView, AnswerFollowToggle, AnswerAjaxUpdateView, AnswerAjaxDeleteView, CommentAjaxCreateView, CommentFollowToggle, CommentAjaxUpdateView, CommentAjaxDeleteView
+from feedback.views import AnswerAjaxCreateView, AnswerFollowToggle, ReplyFollowToggle, AnswerAjaxUpdateView, AnswerAjaxDeleteView, CommentAjaxCreateView, CommentFollowToggle, CommentAjaxUpdateView, CommentAjaxDeleteView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^(?P<pk>[\w-]+)/answer-edit/$', AnswerAjaxUpdateView.as_view(), name='answerEdit'),
     url(r'^(?P<pk>[\w-]+)/answer-delete/$', AnswerAjaxDeleteView.as_view(), name='answerDelete'),
     url(r'^answer-follow/$', AnswerFollowToggle.as_view(), name='followA'),
+    url(r'^answer-Reply/$', ReplyFollowToggle.as_view(), name='followR'),
     url(r'^(?P<pk>[\w-]+)/comment-create/$', CommentAjaxCreateView.as_view(), name='commentCreate'),
     url(r'^(?P<pk>[\w-]+)/comment-edit/$', CommentAjaxUpdateView.as_view(), name='commentEdit'),
     url(r'^(?P<pk>[\w-]+)/comment-delete/$', CommentAjaxDeleteView.as_view(), name='commentDelete'),

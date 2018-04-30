@@ -24,6 +24,14 @@ class AnswerFollowToggle(LoginRequiredMixin, View):
         return redirect(f"/feedback/{ ques_.slug }/")
 
 
+class ReplyFollowToggle(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        Answer_to_toggle = request.POST.get("answer")
+        Answer_, is_following = Answer.objects.toggle_followReply(request.user, Answer_to_toggle)
+        ques_ = Question.objects.get(answer=Answer_)
+        return redirect(f"/feedback/{ ques_.slug }/")
+
+
 class CommentFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         Comment_to_toggle = request.POST.get("comment")
@@ -50,19 +58,25 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         query = self.request.GET.get('q')
         qs = Answer.objects.search(query)
         context['profiles'] = Profile.objects.filter(followers=self.request.user)
-        context['answers'] = Answer.objects.filter(question=ques)
+        context['answers'] = Answer.objects.filter(question=ques).order_by("-followers", "-updated").distinct()
         context['comments'] = Comment.objects.all()
         for comm in context['comments']:
             if comm in self.request.user.is_followingC.all():
-                    is_followingContextC.append(comm)
+                is_followingContextC.append(comm)
         context['is_followingContextC'] = is_followingContextC
         for ans in context['answers']:
             if ans in self.request.user.is_followingA.all():
                 is_followingContextA.append(ans)
+            if ans in self.request.user.is_commenting.all():
+                context['is_commenting'] = ans
+                context['viewcomments'] = Comment.objects.filter(answer=context['is_commenting']).order_by("-followers", "-updated").distinct()
         context['is_followingContextA'] = is_followingContextA
         if qs.exists():
             context['Answers'] = qs
+        context['commentOwner'] = Comment.objects.filter(owner=self.request.user.profile)
+        context['answerOwner'] = Answer.objects.filter(owner=self.request.user.profile)
         return context
+
 
 class CommentAjaxCreateView(AjaxCreateView):
     form_class = CommentCreateForm
@@ -82,6 +96,7 @@ class CommentAjaxCreateView(AjaxCreateView):
         context = super(CommentAjaxCreateView, self).get_context_data(*args, **kwargs)
         context['title'] = Answer.objects.get(pk=self.kwargs.get("pk")).owner
         return context
+
 
 class CommentAjaxUpdateView(AjaxUpdateView):
     form_class = CommentCreateForm
@@ -116,6 +131,7 @@ class CommentAjaxDeleteView(AjaxDeleteView):
         context = super(CommentAjaxDeleteView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Delete Comment'
         return context
+
 
 class AnswerAjaxCreateView(AjaxCreateView):
     form_class = AnswerCreateForm

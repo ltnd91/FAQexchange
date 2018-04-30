@@ -39,11 +39,12 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
                 is_followingContext.append(ques)
         context['is_followingContext'] = is_followingContext
         query = self.request.GET.get('q')
-        qs = Question.objects.search(query)
+        qs = Question.objects.search(query).order_by("-followers", "-updated").distinct()
         context['profiles'] = Profile.objects.filter(followers=self.request.user)
         context['topics'] = Topic.objects.filter(followers=self.request.user)
         if qs.exists():
             context['questions'] = qs
+        context['quesOwner'] = Question.objects.filter(owner=self.request.user.profile)
         return context
 
 

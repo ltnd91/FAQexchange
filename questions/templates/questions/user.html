@@ -72,10 +72,12 @@
             {% else %}
             <p>{% include 'questions/snippet/follow_form.html' with question=ques is_following=False count=ques.followers.count %}</p>
             {% endif %}
-            <p>from: {{ ques.owner }} | topic: {{ ques.topic }} 
-                
-                 | <a href="{% url 'questionEdit' pk=ques.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'questionDelete' pk=ques.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a>
-
+            <p>{% if ques in quesOwner %} 
+                  <a href="{% url 'questionEdit' pk=ques.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'questionDelete' pk=ques.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a>
+                  {% else %}
+                  from: <span class ="btn btn-success btn-sm"> {{ ques.owner }} </span> 
+                  {% endif %}
+                | topic: <span class ="btn btn-danger btn-sm"> {{ ques.topic }} </span> 
             </p>
         </div>
         {% endif %}

@@ -33,5 +33,5 @@ class CommentCreateForm(forms.ModelForm):
     def __init__(self, pk=None, *args, **kwargs):
         # print(kwargs.pop('user'))
         print(kwargs)
-        super(CreateForm, self).__init__(*args, **kwargs)
+        super(CommentCreateForm, self).__init__(*args, **kwargs)
         self.fields['answer'].queryset = Answer.objects.filter(pk=pk)  # .exclude(item__isnull=False)

@@ -63,7 +63,11 @@
             {% else %}
             <p>{% include 'feedback/snippet/follow_form.html' with answer=ans is_following=False count=ans.followers.count %}</p>
             {% endif %}
-            <p>from: {{ ans.owner }} | <a href="{% url 'answerEdit' pk=ans.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'answerDelete' pk=ans.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> | <a href="{% url 'commentCreate' pk=ans.pk %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary btn-sm"> Reply </span> </a></p>
+            {% if is_commenting == ans %} 
+            <p>{% include 'feedback/snippet/follow_formReply.html' with answer=ans is_following2=True owner=answerOwner %}</p> 
+            {% else %}
+            <p>{% include 'feedback/snippet/follow_formReply.html' with answer=ans is_following2=False owner=answerOwner %}</p>
+            {% endif %}
         </div>
         {% endfor %}
     
@@ -73,20 +77,29 @@
     </div>
 
     <div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
+    {% if is_commenting %}
         <div class ='grid-item' style="text-align: left">
+            {% if is_commenting in is_followingContextA %}
+            <p>{% include 'feedback/snippet/follow_form.html' with answer=is_commenting is_following=True count=is_commenting.followers.count %}</p>
+            {% else %}
+            <p>{% include 'feedback/snippet/follow_form.html' with answer=is_commenting is_following=False count=is_commenting.followers.count %}</p>
+            {% endif %}
+            <p> {% if is_commenting in answerOwner %}  <a href="{% url 'answerEdit' pk=is_commenting.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'answerDelete' pk=is_commenting.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> {% else %} from: <span class='btn btn-success btn-sm'> {{ is_commenting.owner }} </span> {% endif %} | <a href="{% url 'commentCreate' pk=is_commenting.pk %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary btn-sm"> Comment </span> </a>
         </div>
-{% if comments %}
-        {% for comm in comments %}
+        {% if viewcomments %}
+        {% for comm in viewcomments %}
         <div class='grid-item' style="text-align: left"> 
             {% if comm in is_followingContextC %}
             <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=True count=comm.followers.count %}</p>
             {% else %}
             <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=False count=comm.followers.count %}</p>
             {% endif %}
-            <p>from: {{ comm.owner }} | <a href="{% url 'commentEdit' pk=comm.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'commentDelete' pk=comm.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a></p>
+            <p> {% if comm in commentOwner %} <a href="{% url 'commentEdit' pk=comm.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'commentDelete' pk=comm.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> {% else %} from: <span class='btn btn-success btn-sm'> {{ comm.owner }} </span> {% endif %}</p>
         </div>
         {% endfor %}
-    
+        {% else %}
+        <p class='lead'>No Comments Found</p>
+        {% endif %}   
 {% else %}
 <p class='lead'>No Comments Found</p>
 {% endif %}

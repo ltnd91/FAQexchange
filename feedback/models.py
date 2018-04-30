@@ -32,6 +32,16 @@ class AnswerManager(models.Manager):
             is_following = True
         return Answer_, is_following
 
+    def toggle_followReply(self, request_user, Answer_to_toggle):
+        Answer_ = Answer.objects.get(name__iexact=Answer_to_toggle)
+        user = request_user
+        Answers = Answer.objects.filter(commentors=user)
+        for ans in Answers:
+            ans.commentors.remove(user)
+        Answer_.commentors.add(user)
+        is_following = True
+        return Answer_, is_following
+
     def get_queryset(self):
         return AnswerQuerySet(self.model, using=self._db)
 
@@ -45,6 +55,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question)  # class_instance.model_set.all() # Django Models Unleashed JOINCFE.com
     followers = models.ManyToManyField(User, related_name='is_followingA', blank=True)  # user.is_following.all()
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
+    commentors = models.ManyToManyField(User, related_name='is_commenting', blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -79,7 +90,8 @@ class Comment(models.Model):
     name = models.CharField(max_length=120)
     owner = models.ForeignKey(Profile)
     answer = models.ForeignKey(Answer)  # class_instance.model_set.all() # Django Models Unleashed JOINCFE.com
-    followers = models.ManyToManyField(User, related_name='is_followingC', blank=True)  # user.is_following.all()
+    followers = models.ManyToManyField(User, related_name='is_followingC', blank=True)
+    # user.is_following.all()
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
