@@ -3,90 +3,17 @@
 {% block head_title %}{{ user.username }} | {{ block.super}}{% endblock head_title %}
 
 {% block content %}
-<div class='row text-center'>
-<form class='form' method='GET' action='.'>
-<input type='text' placeholder="Search.." name='q' value='{{ request.GET.q }}'>
-<button class='btn btn-default' type='submit'>Search</button>
-</form>
-</div>
+
+{% include 'snippets/search-bar.html' %}
 <hr/>
 
 <div class='grid-container' style="border: 2px solid rgba(255, 255, 255, 1); grid-template-columns: 1fr 1fr 4fr">
 
-{% if topics %}
-    <div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1); grid-template-columns: auto">
-        <div class="grid-item">
-            <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllTopics %} <span class="btn btn-default btn-sm">showFilter</span> {% else %} <span class="btn btn-danger btn-sm"> showAll</span>{% endif %}</a>
-        </div>
-        {% if not user.profile.showAllTopics %} 
-        {% for top in topics %}
-        <div class='grid-item'> 
-            <p>{{ top.name }}</p> 
-            {% if user in top.viewers.all %}
-            <p>{% include 'topics/snippet/view_form.html' with topic=top.name is_following=True %}</p>
-            {% else %}
-            <p>{% include 'topics/snippet/view_form.html' with topic=top.name is_following=False %}</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-{% else %}
-<p class='lead'>No Topics Found</p>
-{% endif %}
+{% include 'topics/snippet/topic-filter.html' %}
 
-{% if profiles %}
-    <div class='grid-container' style="border: 2px solid rgba(0, 255, 0, 1); grid-template-columns: auto">
-        <div class="grid-item">
-            <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllUsers %} <span class="btn btn-default btn-sm"> showFilter </span>{% else %}<span class="btn btn-success btn-sm"> showAll </span>{% endif %}</a>
-        </div>
-        
-        {% if not user.profile.showAllUsers %} 
-        {% for pro in profiles %}
-        <div class='grid-item'> 
-            <p>{{ pro.user }}</p> 
-            {% if user in pro.viewers.all %}
-            <p>{% include 'profiles/snippet/view_form.html' with username=pro.user.username is_following=True %}</p>
-            {% else %}
-            <p>{% include 'profiles/snippet/view_form.html' with username=pro.user.username is_following=False %}</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-{% else %}
-<p class='lead'>No Users Found</p>
-{% endif %}
+{% include 'profiles/snippet/profile-filter.html' %}
 
-{% if questions %}
-    <div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
-        <div class ='grid-item' style="text-align: left">
-            <a href="{% url 'questionCreate' %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary"> create a question</span> </a>
-        </div>
-        {% for ques in questions %}
-        {% if ques.topic in user.is_viewingT.all or user.profile.showAllTopics %}
-        {% if ques.owner in user.is_viewing.all or user.profile.showAllUsers %}
-        <div class='grid-item' style="text-align: left"> 
-            {% if ques in is_followingContext %}
-            <p>{% include 'questions/snippet/follow_form.html' with question=ques is_following=True count=ques.followers.count %}</p>
-            {% else %}
-            <p>{% include 'questions/snippet/follow_form.html' with question=ques is_following=False count=ques.followers.count %}</p>
-            {% endif %}
-            <p>{% if ques in quesOwner %} 
-                  <a href="{% url 'questionEdit' pk=ques.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'questionDelete' pk=ques.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a>
-                  {% else %}
-                  from: <span class ="btn btn-success btn-sm"> {{ ques.owner }} </span> 
-                  {% endif %}
-                | topic: <span class ="btn btn-danger btn-sm"> {{ ques.topic }} </span> 
-            </p>
-        </div>
-        {% endif %}
-        {% endif %}
-        {% endfor %}
-    </div>
-{% else %}
-<p class='lead'>No Questions Found</p>
-{% endif %}
+{% include 'questions/snippet/question-list.html' %}
 <hr/>
 
 </div>

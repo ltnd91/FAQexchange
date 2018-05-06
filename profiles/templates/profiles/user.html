@@ -3,22 +3,16 @@
 {% block head_title %}{{ user.username }} | {{ block.super}}{% endblock head_title %}
 
 {% block content %}
-<div class='row text-center'>
-<form class='form' method='GET' action='.'>
-<input type='text' placeholder="Search.." name='q' value='{{ request.GET.q }}'>
-<button class='btn btn-default' type='submit'>Search</button>
-</form>
-</div>
+{% include 'snippets/search-bar.html' %}
 <hr/>
 {% if profiles %}
     <div class='grid-container' style="border: 2px solid rgba(0, 255, 0, 1)">
         {% for pro in profiles %}
         <div class='grid-item'> 
-            <h4>{{ pro.user }}</h4> 
-            {% if pro in is_followingContext %}
-            <p>{% include 'profiles/snippet/follow_form.html' with username=pro.user.username is_following=True %}</p>
+            {% if pro in is_following_profile %}
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=True false_button='Unfollow' true_button='Follow' url_name='followProfile' button_color='btn-success' %}</p>
             {% else %}
-            <p>{% include 'profiles/snippet/follow_form.html' with username=pro.user.username is_following=False %}</p>
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=False false_button='Unfollow' true_button='Follow' url_name='followProfile' button_color='btn-success' %}</p>
             {% endif %}
         </div>
         {% endfor %}

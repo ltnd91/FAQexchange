@@ -1,0 +1,6 @@
+{% if request.user.is_authenticated %}
+<form class='form' method='POST' action='{% url "followReplyAnswer" %}'> {% csrf_token %}
+<input type='hidden' name='model_name' value='{{ model_name }}'/>
+<p> {% if model_name in owner %}  <a href="{% url 'answerEdit' pk=model_name.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'answerDelete' pk=model_name.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> {% else %} from: <span class='btn btn-success btn-sm'> {{ model_name.owner }} </span> {% endif %} | <button class='btn {% if is_following %}btn-default{% else %}btn-primary{% endif %} btn-sm'>{% if is_following %}Viewing...{% else %}Reply{% endif %}</button> </p>
+</form>
+{% endif %}

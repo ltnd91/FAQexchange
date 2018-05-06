@@ -3,7 +3,6 @@ from django import forms
 from topics.models import Topic
 
 from .models import Question
-from profiles.models import Profile
 
 
 class QuestionCreateForm(forms.ModelForm):
@@ -26,21 +25,6 @@ class QuestionCreateForm(forms.ModelForm):
         print(kwargs)
         super(QuestionCreateForm, self).__init__(*args, **kwargs)
         self.fields['topic'].queryset = Topic.objects.filter(followers=user)
-
-
-class QuestionFilterForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = [
-            'showAllTopics',
-            'showAllUsers',
-        ]
-
-    def __init__(self, user=None, *args, **kwargs):
-        # print(kwargs.pop('user'))
-        print(user)
-        print(kwargs)
-        super(QuestionFilterForm, self).__init__(*args, **kwargs)
 
     # def clean_email(self):
     #     email = self.cleaned_data.get("email")

@@ -13,56 +13,29 @@ User = get_user_model()
 
 class TopicFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        topic_to_toggle = request.POST.get("topic")
-        topic_, is_following = Topic.objects.toggle_follow(request.user, topic_to_toggle)
+        topic_to_toggle = request.POST.get("model_name")
+        topic_, is_following = Topic.objects.toggle_follow_toggle(request.user, topic_to_toggle)
         return redirect(f"/topic/{request.user.username}/")
 
 
 class TopicViewToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        topic_to_toggle = request.POST.get("topic")
-        topic_, is_following = Topic.objects.toggle_view(request.user, topic_to_toggle)
+        topic_to_toggle = request.POST.get("model_name")
+        topic_, is_following = Topic.objects.toggle_view_topic(request.user, topic_to_toggle)
         return redirect(f"/question/{request.user.username}/")
 
 
-# class TopicDetailView(DetailView):
-#     template_name = 'topics/user.html'
-
-#     def get_object(self):
-#         return self.kwargs.get("topic")
-
-#     def get_context_data(self, *args, **kwargs):
-#         context = super(TopicDetailView, self).get_context_data(*args, **kwargs)
-#         is_followingContext = []
-#         for top in Topic.objects.all():
-#             if top in self.request.user.is_followingT.all():
-#                 is_followingContext.append(top)
-#         context['is_followingContext'] = is_followingContext
-#         query = self.request.GET.get('q')
-#         qs = Topic.objects.search(query)
-#         if qs.exists():
-#             context['topics'] = qs
-#         return context
-
-
-class TopicCreateView(LoginRequiredMixin, UpdateView):
+class TopicCreateView(LoginRequiredMixin, CreateView):
     form_class = TopicCreateForm
     template_name = 'topics/user.html'
 
-    def get_object(self):
-        return self.kwargs.get("topic")
-
-    def form_valid(self, form):  # i think cbv calls this by default test later to remove
-        instance = form.save(commit=False)
-        return super(TopicCreateView, self).form_valid(form)
-
     def get_context_data(self, *args, **kwargs):
         context = super(TopicCreateView, self).get_context_data(*args, **kwargs)
-        is_followingContext = []
+        is_following_topic = []
         for top in Topic.objects.all():
-            if top in self.request.user.is_followingT.all():
-                is_followingContext.append(top)
-        context['is_followingContext'] = is_followingContext
+            if top in self.request.user.is_following_topic.all():
+                is_following_topic.append(top)
+        context['is_following_topic'] = is_following_topic
         query = self.request.GET.get('q')
         qs = Topic.objects.search(query)
         if qs.exists():
@@ -72,4 +45,11 @@ class TopicCreateView(LoginRequiredMixin, UpdateView):
 
 class TopicAjaxCreateView(AjaxCreateView):
     form_class = TopicCreateForm
-    template_name = 'topics/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(TopicAjaxCreateView, self).get_context_data(*args, **kwargs)
+        context['title'] = 'Create Topic'
+        context['header'] = 'using name of an existing topic will be rejected'
+        context['button_name'] = 'Add'
+        return context

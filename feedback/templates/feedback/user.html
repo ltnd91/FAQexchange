@@ -3,107 +3,21 @@
 {% block head_title %}{{ user.username }} | {{ block.super}}{% endblock head_title %}
 
 {% block content %}
-<div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
-        <div class='grid-item' style="text-align: left"> 
-            {% if question in is_followingContext %}
-            <p>{% include 'questions/snippet/follow_form2.html' with question=question is_following=True count=question.followers.count %}</p>
-            {% else %}
-            <p>{% include 'questions/snippet/follow_form2.html' with question=question is_following=False count=question.followers.count %}</p>
-            {% endif %}
-            <p>from: {{ question.owner }} | topic: {{ question.topic }}</p>
-        </div>
-    </div>
-        </div>
-    </div>
+
+{% include 'questions/snippet/question-list.html' with url_name='followQuestionFeedback' %}
+
 <hr/>
 
-<div class='row text-center'>
-<form class='form' method='GET' action='.'>
-<input type='text' placeholder="Search.." name='q' value='{{ request.GET.q }}'>
-<button class='btn btn-default' type='submit'>Search</button>
-</form>
-</div>
+{% include 'snippets/search-bar.html' %}
 <hr/>
 
 <div class='grid-container' style="border: 2px solid rgba(255, 255, 255, 1); grid-template-columns: 2fr 5fr 5fr">
 
-{% if profiles %}
-    <div class='grid-container' style="border: 2px solid rgba(0, 255, 0, 1); grid-template-columns: auto">
-        <div class="grid-item">
-            <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllUsers %} <span class="btn btn-default btn-sm"> showFilter </span>{% else %}<span class="btn btn-success btn-sm"> showAll </span>{% endif %}</a>
-        </div>
-        
-        {% if not user.profile.showAllUsers %} 
-        {% for pro in profiles %}
-        <div class='grid-item'> 
-            <p>{{ pro.user }}</p> 
-            {% if user in pro.viewers.all %}
-            <p>{% include 'profiles/snippet/view_form2.html' with username=pro.user.username is_following=True %}</p>
-            {% else %}
-            <p>{% include 'profiles/snippet/view_form2.html' with username=pro.user.username is_following=False %}</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-{% else %}
-<p class='lead'>No Users Found</p>
-{% endif %}
+{% include 'profiles/snippet/profile-filter.html' %}
 
+{% include 'feedback/snippet/answer-list.html' %}
 
-    <div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1); grid-template-columns: auto">
-        <div class ='grid-item' style="text-align: left">
-            <a href="{% url 'answerCreate' slug=question.slug %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger"> create an answer</span> </a>
-        </div>
-{% if answers %}
-        {% for ans in answers %}
-        <div class='grid-item' style="text-align: left"> 
-            {% if ans in is_followingContextA %}
-            <p>{% include 'feedback/snippet/follow_form.html' with answer=ans is_following=True count=ans.followers.count %}</p>
-            {% else %}
-            <p>{% include 'feedback/snippet/follow_form.html' with answer=ans is_following=False count=ans.followers.count %}</p>
-            {% endif %}
-            {% if is_commenting == ans %} 
-            <p>{% include 'feedback/snippet/follow_formReply.html' with answer=ans is_following2=True owner=answerOwner %}</p> 
-            {% else %}
-            <p>{% include 'feedback/snippet/follow_formReply.html' with answer=ans is_following2=False owner=answerOwner %}</p>
-            {% endif %}
-        </div>
-        {% endfor %}
-    
-{% else %}
-<p class='lead'>No Answers Found</p>
-{% endif %}
-    </div>
-
-    <div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
-    {% if is_commenting %}
-        <div class ='grid-item' style="text-align: left">
-            {% if is_commenting in is_followingContextA %}
-            <p>{% include 'feedback/snippet/follow_form.html' with answer=is_commenting is_following=True count=is_commenting.followers.count %}</p>
-            {% else %}
-            <p>{% include 'feedback/snippet/follow_form.html' with answer=is_commenting is_following=False count=is_commenting.followers.count %}</p>
-            {% endif %}
-            <p> {% if is_commenting in answerOwner %}  <a href="{% url 'answerEdit' pk=is_commenting.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'answerDelete' pk=is_commenting.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> {% else %} from: <span class='btn btn-success btn-sm'> {{ is_commenting.owner }} </span> {% endif %} | <a href="{% url 'commentCreate' pk=is_commenting.pk %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary btn-sm"> Comment </span> </a>
-        </div>
-        {% if viewcomments %}
-        {% for comm in viewcomments %}
-        <div class='grid-item' style="text-align: left"> 
-            {% if comm in is_followingContextC %}
-            <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=True count=comm.followers.count %}</p>
-            {% else %}
-            <p>{% include 'feedback/snippet/follow_formC.html' with comment=comm is_following=False count=comm.followers.count %}</p>
-            {% endif %}
-            <p> {% if comm in commentOwner %} <a href="{% url 'commentEdit' pk=comm.pk %}" class="modal-update" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'commentDelete' pk=comm.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a> {% else %} from: <span class='btn btn-success btn-sm'> {{ comm.owner }} </span> {% endif %}</p>
-        </div>
-        {% endfor %}
-        {% else %}
-        <p class='lead'>No Comments Found</p>
-        {% endif %}   
-{% else %}
-<p class='lead'>No Comments Found</p>
-{% endif %}
-    </div>
+{% include 'feedback/snippet/comment-list.html' %}
 
 </div>
 

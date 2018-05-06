@@ -3,5 +3,5 @@
 {% endif %}
 <form method='POST'> {% csrf_token %}
     {{ form.as_p }}
-    <button type='submit'>Add</button>
+    <button type='submit'>{{ button_name }}</button>
 </form>

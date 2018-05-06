@@ -1,0 +1,20 @@
+{% if topics %}
+    <div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1); grid-template-columns: auto">
+        <div class="grid-item">
+            <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllTopics %} <span class="btn btn-default btn-sm">showFilter</span> {% else %} <span class="btn btn-danger btn-sm"> showAll</span>{% endif %}</a>
+        </div>
+        {% if not user.profile.showAllTopics %} 
+        {% for top in topics %}
+        <div class='grid-item'>  
+            {% if user in top.viewers.all %}
+            <p>{% include 'forms/follow_form.html' with model_name=top is_following=True false_button='Hide' true_button='Show' url_name='viewTopic' button_color='btn-danger' %}</p>
+            {% else %}
+            <p>{% include 'forms/follow_form.html' with model_name=top is_following=False false_button='Hide' true_button='Show' url_name='viewTopic' button_color='btn-danger' %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+{% else %}
+<p class='lead'>No Topics Found</p>
+{% endif %}

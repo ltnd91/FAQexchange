@@ -8,22 +8,23 @@ from django.views.generic import CreateView, DetailView, View
 from .models import Question
 from profiles.models import Profile
 from topics.models import Topic
-from .forms import QuestionCreateForm, QuestionFilterForm
+from .forms import QuestionCreateForm
+from .utils import unique_slug_generator
 from modal.views import AjaxCreateView, AjaxUpdateView, AjaxDeleteView
 User = get_user_model()
 
 
 class QuestionFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        question_to_toggle = request.POST.get("question")
-        question_, is_following = Question.objects.toggle_follow(request.user, question_to_toggle)
+        question_to_toggle = request.POST.get("model_name")
+        question_, is_following = Question.objects.toggle_follow_question(request.user, question_to_toggle)
         return redirect(f"/question/{request.user.username}/")
 
 
-class QuestionFollowToggle2(LoginRequiredMixin, View):
+class QuestionFollowToggleFeedback(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        question_to_toggle = request.POST.get("question")
-        question_, is_following = Question.objects.toggle_follow(request.user, question_to_toggle)
+        question_to_toggle = request.POST.get("model_name")
+        question_, is_following = Question.objects.toggle_follow_question(request.user, question_to_toggle)
         return redirect(f"/feedback/{question_.slug}/")
 
 
@@ -33,24 +34,25 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(*args, **kwargs)
-        is_followingContext = []
+        is_following_question = []
         for ques in Question.objects.all():
             if ques in self.request.user.is_followingQ.all():
-                is_followingContext.append(ques)
-        context['is_followingContext'] = is_followingContext
+                is_following_question.append(ques)
+        context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')
         qs = Question.objects.search(query).order_by("-followers", "-updated").distinct()
         context['profiles'] = Profile.objects.filter(followers=self.request.user)
         context['topics'] = Topic.objects.filter(followers=self.request.user)
         if qs.exists():
             context['questions'] = qs
-        context['quesOwner'] = Question.objects.filter(owner=self.request.user.profile)
+        context['question_owner'] = Question.objects.filter(owner=self.request.user.profile)
+        context['is_following_profile_question'] = Profile.objects.filter(followers=self.request.user)
         return context
 
 
 class QuestionAjaxCreateView(AjaxCreateView):
     form_class = QuestionCreateForm
-    template_name = 'questions/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def form_valid(self, form):  # i think cbv calls this by default test later to remove
         instance = form.save(commit=False)
@@ -65,44 +67,39 @@ class QuestionAjaxCreateView(AjaxCreateView):
     def get_context_data(self, *args, **kwargs):
         context = super(QuestionAjaxCreateView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Create questions'
+        context['header'] = 'using name of an existing question will be rejected'
+        context['button_name'] = 'Add'
         return context
 
 
 class QuestionAjaxUpdateView(AjaxUpdateView):
-    form_class = QuestionFilterForm
-    template_name = 'questions/snippet/filter_form.html'
-
-    def get_queryset(self):
-        return Profile.objects.filter(user=self.request.user)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(QuestionAjaxUpdateView, self).get_context_data(*args, **kwargs)
-        context['title'] = 'Filter questions'
-        return context
-
-
-class QuestionAjaxUpdateView2(AjaxUpdateView):
     form_class = QuestionCreateForm
-    template_name = 'questions/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
+
+    def form_valid(self, form):  # i think cbv calls this by default test later to remove
+        instance = form.save(commit=False)
+        instance.slug = unique_slug_generator(instance)
+        return super(QuestionAjaxUpdateView, self).form_valid(form)
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
         return Question.objects.filter(owner=profile_)
 
     def get_form_kwargs(self):
-        kwargs = super(QuestionAjaxUpdateView2, self).get_form_kwargs()
+        kwargs = super(QuestionAjaxUpdateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
     def get_context_data(self, *args, **kwargs):
-        context = super(QuestionAjaxUpdateView2, self).get_context_data(*args, **kwargs)
-        context['title'] = 'Edit questions'
+        context = super(QuestionAjaxUpdateView, self).get_context_data(*args, **kwargs)
+        context['title'] = 'Edit Question'
+        context['button_name'] = 'Update'
         return context
 
 
 class QuestionAjaxDeleteView(AjaxDeleteView):
     form_class = QuestionCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
@@ -111,4 +108,5 @@ class QuestionAjaxDeleteView(AjaxDeleteView):
     def get_context_data(self, *args, **kwargs):
         context = super(QuestionAjaxDeleteView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Delete Question'
+        context['button_name'] = 'Delete'
         return context

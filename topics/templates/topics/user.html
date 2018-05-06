@@ -3,23 +3,20 @@
 {% block head_title %}{{ user.username }} | {{ block.super}}{% endblock head_title %}
 
 {% block content %}
-<div class='row text-center'>
-<form class='form' method='GET' action='.'>
-<input type='text' placeholder="Search.." name='q' value='{{ request.GET.q }}'>
-<button class='btn btn-default' type='submit'>Search</button>
-</form>
-<a href="{% url 'topicCreate' %}" class="modal-create" data-modal-head="" data-modal-callback="reload"><span class="btn btn-danger btn-sm">create a topic</span></a> 
-</div>
+
+{% include 'snippets/search-bar.html' %}
+<div class="row text-center">
+<a href="{% url 'topicCreate' %}" class="modal-create" data-modal-head="" data-modal-callback="reload"><span class="btn btn-danger btn-sm">create a topic</span></a></div>
+
 <hr/>
 {% if topics %}
     <div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1)">
         {% for top in topics %}
         <div class='grid-item'> 
-            <h4>{{ top.name }}</h4> 
-            {% if top in is_followingContext %}
-            <p>{% include 'topics/snippet/follow_form.html' with topic=top.name is_following=True %}</p>
+            {% if top in is_following_topic %}
+            <p>{% include 'forms/follow_form.html' with model_name=top is_following=True false_button='Unfollow' true_button='Follow' url_name='followTopic' button_color='btn-danger' %}</p>
             {% else %}
-            <p>{% include 'topics/snippet/follow_form.html' with topic=top.name is_following=False %}</p>
+            <p>{% include 'forms/follow_form.html' with model_name=top is_following=False false_button='Unfollow' true_button='Follow' url_name='followTopic' button_color='btn-danger' %}</p>
             {% endif %}
         </div>
         {% endfor %}

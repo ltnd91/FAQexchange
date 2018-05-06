@@ -1,0 +1,26 @@
+<div class='grid-container' style="border: 2px solid rgba(255, 0, 0, 1); grid-template-columns: auto">
+    <div class ='grid-item' style="text-align: left">
+        <a href="{% url 'answerCreate' slug=question.slug %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger"> create an answer</span> </a>
+    </div>
+{% if answers %}
+    {% for ans in answers %}
+    {% if ans.owner in user.is_viewing_profile.all or user.profile.showAllUsers %}
+    <div class='grid-item' style="text-align: left"> 
+        {% if ans in is_following_answer %}
+        <p>{% include 'forms/follow_form.html' with model_name=ans is_following=True count=ans.followers.count false_button='Unlike' true_button='Like' url_name='followAnswer' button_color='btn-danger' %}</p>
+        {% else %}
+        <p>{% include 'forms/follow_form.html' with model_name=ans is_following=False count=ans.followers.count false_button='Unlike' true_button='Like' url_name='followAnswer' button_color='btn-danger' %}</p>
+        {% endif %}
+        {% if is_replying_answer == ans %} 
+        <p>{% include 'feedback/snippet/follow_form_reply.html' with model_name=ans is_following=True owner=answer_owner %}</p> 
+        {% else %}
+        <p>{% include 'feedback/snippet/follow_form_reply.html' with model_name=ans is_following=False owner=answer_owner %}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    
+{% else %}
+<p class='lead'>No Answers Found</p>
+{% endif %}
+</div>

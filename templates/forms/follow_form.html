@@ -1,0 +1,7 @@
+{% if request.user.is_authenticated %}
+<form class='form' method='POST' action='{% url url_name %}'> {% csrf_token %}
+<input type='hidden' name='model_name' value='{{ model_name }}'/>
+<p>{{ count }}
+<button class='btn {% if is_following %}btn-default{% else %}{{button_color}}{% endif %} btn-sm'>{% if is_following %}{{ false_button }}{% else %}{{ true_button }}{% endif %}</button> </button><a href='{{ model_name.get_absolute_url }}'> {{ model_name.name }}{{ profile_name }} </a>
+</form>
+{% endif %}

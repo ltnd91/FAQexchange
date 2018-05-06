@@ -18,27 +18,27 @@ User = get_user_model()
 
 class AnswerFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        Answer_to_toggle = request.POST.get("answer")
-        Answer_, is_following = Answer.objects.toggle_follow(request.user, Answer_to_toggle)
-        ques_ = Question.objects.get(answer=Answer_)
-        return redirect(f"/feedback/{ ques_.slug }/")
+        Answer_to_toggle = request.POST.get("model_name")
+        Answer_, is_following = Answer.objects.toggle_follow_answer(request.user, Answer_to_toggle)
+        Question_ = Question.objects.get(answer=Answer_)
+        return redirect(f"/feedback/{ Question_.slug }/")
 
 
-class ReplyFollowToggle(LoginRequiredMixin, View):
+class ReplyAnswerFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        Answer_to_toggle = request.POST.get("answer")
-        Answer_, is_following = Answer.objects.toggle_followReply(request.user, Answer_to_toggle)
-        ques_ = Question.objects.get(answer=Answer_)
-        return redirect(f"/feedback/{ ques_.slug }/")
+        Answer_to_toggle = request.POST.get("model_name")
+        Answer_, is_following = Answer.objects.toggle_follow_reply_answer(request.user, Answer_to_toggle)
+        Question_ = Question.objects.get(answer=Answer_)
+        return redirect(f"/feedback/{ Question_.slug }/")
 
 
 class CommentFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        Comment_to_toggle = request.POST.get("comment")
-        Comment_, is_following = Comment.objects.toggle_follow(request.user, Comment_to_toggle)
+        Comment_to_toggle = request.POST.get("model_name")
+        Comment_, is_following = Comment.objects.toggle_follow_comment(request.user, Comment_to_toggle)
         Answer_ = Answer.objects.get(comment=Comment_)
-        ques_ = Question.objects.get(answer=Answer_)
-        return redirect(f"/feedback/{ ques_.slug }/")
+        Question_ = Question.objects.get(answer=Answer_)
+        return redirect(f"/feedback/{ Question_.slug }/")
 
 
 class AnswerCreateView(LoginRequiredMixin, CreateView):
@@ -47,40 +47,49 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AnswerCreateView, self).get_context_data(*args, **kwargs)
-        is_followingContext = []
-        is_followingContextA = []
-        is_followingContextC = []
-        ques = Question.objects.get(slug=self.kwargs.get("slug"))
-        context['question'] = ques
-        if ques in self.request.user.is_followingQ.all():
-            is_followingContext.append(ques)
-        context['is_followingContext'] = is_followingContext
+        is_following_answer = []
+        is_following_comment = []
+        is_following_profile = []
+        is_following_question = []
+        context['question'] = Question.objects.get(slug=self.kwargs.get("slug"))
+        if context['question'] in self.request.user.is_followingQ.all():
+            is_following_question.append(context['question'])
+        context['is_following_question'] = is_following_question
+        is_viewing_question = Question.objects.filter(viewers=self.request.user)
+        for ques in is_viewing_question:
+            ques.viewers.remove(self.request.user)
+        context['question'].viewers.add(self.request.user)
         query = self.request.GET.get('q')
         qs = Answer.objects.search(query)
-        context['profiles'] = Profile.objects.filter(followers=self.request.user)
-        context['answers'] = Answer.objects.filter(question=ques).order_by("-followers", "-updated").distinct()
-        context['comments'] = Comment.objects.all()
-        for comm in context['comments']:
-            if comm in self.request.user.is_followingC.all():
-                is_followingContextC.append(comm)
-        context['is_followingContextC'] = is_followingContextC
-        for ans in context['answers']:
-            if ans in self.request.user.is_followingA.all():
-                is_followingContextA.append(ans)
-            if ans in self.request.user.is_commenting.all():
-                context['is_commenting'] = ans
-                context['viewcomments'] = Comment.objects.filter(answer=context['is_commenting']).order_by("-followers", "-updated").distinct()
-        context['is_followingContextA'] = is_followingContextA
         if qs.exists():
-            context['Answers'] = qs
-        context['commentOwner'] = Comment.objects.filter(owner=self.request.user.profile)
-        context['answerOwner'] = Answer.objects.filter(owner=self.request.user.profile)
+            context['answers'] = qs.filter(question=context['question']).order_by("-followers", "-updated").distinct()
+            for ans in context['answers']:
+                if ans.owner not in is_following_profile:
+                    is_following_profile.append(ans.owner)
+            for ans in context['answers']:
+                if ans in self.request.user.is_following_answer.all():
+                    is_following_answer.append(ans)
+                if ans in self.request.user.is_replying_answer.all():
+                    context['is_replying_answer'] = ans
+                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by("-followers", "-updated").distinct()
+                    for comm in context['is_viewing_comment']:
+                        if comm.owner not in is_following_profile:
+                            is_following_profile.append(comm.owner)
+        context['is_following_profile'] = is_following_profile
+        context['is_following_answer'] = is_following_answer
+        for comm in Comment.objects.all():
+            if comm in self.request.user.is_following_comment.all():
+                is_following_comment.append(comm)
+        context['is_following_comment'] = is_following_comment
+        context['comment_owner'] = Comment.objects.filter(owner=self.request.user.profile)
+        context['answer_owner'] = Answer.objects.filter(owner=self.request.user.profile)
+        context['question_owner'] = Question.objects.filter(owner=self.request.user.profile)
         return context
 
 
 class CommentAjaxCreateView(AjaxCreateView):
     form_class = CommentCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def form_valid(self, form):
         instance = form.save(commit=False)
@@ -94,13 +103,14 @@ class CommentAjaxCreateView(AjaxCreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(CommentAjaxCreateView, self).get_context_data(*args, **kwargs)
-        context['title'] = Answer.objects.get(pk=self.kwargs.get("pk")).owner
+        context['title'] = "Add Comment"
+        context['button_name'] = 'Add'
         return context
 
 
 class CommentAjaxUpdateView(AjaxUpdateView):
     form_class = CommentCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
@@ -116,12 +126,13 @@ class CommentAjaxUpdateView(AjaxUpdateView):
     def get_context_data(self, *args, **kwargs):
         context = super(CommentAjaxUpdateView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Edit Comment'
+        context['button_name'] = 'Update'
         return context
 
 
 class CommentAjaxDeleteView(AjaxDeleteView):
     form_class = CommentCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
@@ -130,12 +141,13 @@ class CommentAjaxDeleteView(AjaxDeleteView):
     def get_context_data(self, *args, **kwargs):
         context = super(CommentAjaxDeleteView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Delete Comment'
+        context['button_name'] = 'Delete'
         return context
 
 
 class AnswerAjaxCreateView(AjaxCreateView):
     form_class = AnswerCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def form_valid(self, form):
         instance = form.save(commit=False)
@@ -149,13 +161,14 @@ class AnswerAjaxCreateView(AjaxCreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AnswerAjaxCreateView, self).get_context_data(*args, **kwargs)
-        context['title'] = Question.objects.get(slug=self.kwargs.get("slug")).owner
+        context['title'] = 'Add Answer'
+        context['button_name'] = 'Add'
         return context
 
 
 class AnswerAjaxUpdateView(AjaxUpdateView):
     form_class = AnswerCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
@@ -171,12 +184,13 @@ class AnswerAjaxUpdateView(AjaxUpdateView):
     def get_context_data(self, *args, **kwargs):
         context = super(AnswerAjaxUpdateView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Edit Answer'
+        context['button_name'] = 'Update'
         return context
 
 
 class AnswerAjaxDeleteView(AjaxDeleteView):
     form_class = AnswerCreateForm
-    template_name = 'feedback/snippet/create_form.html'
+    template_name = 'forms/create_form.html'
 
     def get_queryset(self):
         profile_ = Profile.objects.get(user=self.request.user)
@@ -185,4 +199,5 @@ class AnswerAjaxDeleteView(AjaxDeleteView):
     def get_context_data(self, *args, **kwargs):
         context = super(AnswerAjaxDeleteView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Delete Answer'
+        context['button_name'] = 'Delete'
         return context

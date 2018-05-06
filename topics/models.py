@@ -18,7 +18,7 @@ class TopicQuerySet(models.query.QuerySet):
 
 
 class TopicManager(models.Manager):
-    def toggle_follow(self, request_user, topic_to_toggle):
+    def toggle_follow_toggle(self, request_user, topic_to_toggle):
         topic_ = Topic.objects.get(name__iexact=topic_to_toggle)
         user = request_user
         is_following = False
@@ -29,7 +29,7 @@ class TopicManager(models.Manager):
             is_following = True
         return topic_, is_following
 
-    def toggle_view(self, request_user, topic_to_toggle):
+    def toggle_view_topic(self, request_user, topic_to_toggle):
         topic_ = Topic.objects.get(name__iexact=topic_to_toggle)
         user = request_user
         is_following = False
@@ -49,8 +49,8 @@ class TopicManager(models.Manager):
 
 class Topic(models.Model):
     name = models.CharField(max_length=120)
-    followers = models.ManyToManyField(User, related_name='is_followingT', blank=True)  # user.is_following.all()
-    viewers = models.ManyToManyField(User, related_name='is_viewingT', blank=True)
+    followers = models.ManyToManyField(User, related_name='is_following_topic', blank=True)  # user.is_following.all()
+    viewers = models.ManyToManyField(User, related_name='is_viewing_topic', blank=True)
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

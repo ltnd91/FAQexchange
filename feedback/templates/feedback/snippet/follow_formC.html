@@ -1,7 +1,0 @@
-{% if request.user.is_authenticated %}
-<form class='form' method='POST' action='{% url "followC" %}'> {% csrf_token %}
-<input type='hidden' name='comment' value='{{ comment }}'/>
-<p>{{ count }}
-<button class='btn {% if is_following %}btn-default{% else %}btn-primary{% endif %} btn-sm'>{% if is_following %}Unlike{% else %}Like{% endif %}</button> {{ comment.name }}</p>
-</form>
-{% endif %}

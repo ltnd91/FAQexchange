@@ -22,7 +22,7 @@ class QuestionQuerySet(models.query.QuerySet):
 
 
 class QuestionManager(models.Manager):
-    def toggle_follow(self, request_user, question_to_toggle):
+    def toggle_follow_question(self, request_user, question_to_toggle):
         question_ = Question.objects.get(name__iexact=question_to_toggle)
         user = request_user
         is_following = False
@@ -46,6 +46,7 @@ class Question(models.Model):
     topic = models.ForeignKey(Topic)  # class_instance.model_set.all() # Django Models Unleashed JOINCFE.com
     followers = models.ManyToManyField(User, related_name='is_followingQ', blank=True)  # user.is_following.all()
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
+    viewers = models.ManyToManyField(User, related_name='is_viewing_question', blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     slug = models.SlugField(null=True, blank=True)

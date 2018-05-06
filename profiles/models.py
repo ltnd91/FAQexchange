@@ -18,7 +18,7 @@ class ProfileQuerySet(models.query.QuerySet):
 
 
 class ProfileManager(models.Manager):
-    def toggle_follow(self, request_user, username_to_toggle):
+    def toggle_follow_profile(self, request_user, username_to_toggle):
         profile_ = Profile.objects.get(user__username__iexact=username_to_toggle)
         user = request_user
         is_following = False
@@ -29,7 +29,7 @@ class ProfileManager(models.Manager):
             is_following = True
         return profile_, is_following
 
-    def toggle_view(self, request_user, username_to_toggle):
+    def toggle_view_profile(self, request_user, username_to_toggle):
         profile_ = Profile.objects.get(user__username__iexact=username_to_toggle)
         user = request_user
         is_following = False
@@ -50,7 +50,7 @@ class ProfileManager(models.Manager):
 class Profile(models.Model):
     user = models.OneToOneField(User)  # user.profile
     followers = models.ManyToManyField(User, related_name='is_following', blank=True)
-    viewers = models.ManyToManyField(User, related_name='is_viewing', blank=True)
+    viewers = models.ManyToManyField(User, related_name='is_viewing_profile', blank=True)
     # user.is_following.all()
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
     showAllTopics = models.BooleanField(default=False)
@@ -65,7 +65,7 @@ class Profile(models.Model):
 
     def get_absolute_url(self):  # get_absolute_url
         # return f"/restaurants/{self.slug}"
-        return reverse('questionUpdate', kwargs={'pk': self.pk})
+        return reverse('profileUpdate', kwargs={'pk': self.pk})
 
 
 def post_save_user_receiver(sender, instance, created, *args, **kwargs):

@@ -1,0 +1,36 @@
+<div class='grid-container' style="border: 2px solid rgba(0, 255, 0, 1); grid-template-columns: auto">
+    
+    
+    <div class="grid-item">
+        <a href="{{ user.profile.get_absolute_url }}" class="modal-update" data-modal-head="" data-modal-callback="reload" >{% if user.profile.showAllUsers %} <span class="btn btn-default btn-sm"> showFilter </span>{% else %}<span class="btn btn-success btn-sm"> showAll </span>{% endif %}</a>
+    </div>
+        
+        {% if not user.profile.showAllUsers %}
+        {% if is_following_profile %} 
+        {% for pro in is_following_profile %}
+        <div class='grid-item'> 
+            {% if user in pro.viewers.all %}
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=True false_button='Hide' true_button='Show' url_name='viewProfileFeedback' button_color='btn-success' %}</p>
+            {% else %}
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=False false_button='Hide' true_button='Show' url_name='viewProfileFeedback' button_color='btn-success' %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% elif is_following_profile_question %} 
+        {% for pro in is_following_profile_question %}
+        <div class='grid-item'> 
+            {% if user in pro.viewers.all %}
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=True false_button='Hide' true_button='Show' url_name='viewProfileQuestion' button_color='btn-success' %}</p>
+            {% else %}
+            <p>{% include 'forms/follow_form.html' with model_name=pro.user.username profile_name=pro.user.username is_following=False false_button='Hide' true_button='Show' url_name='viewProfileQuestion' button_color='btn-success' %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class='lead'>No Users Found</p>
+        {% endif %}
+        {% endif %}
+    
+
+
+</div>
