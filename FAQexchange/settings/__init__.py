@@ -1,12 +1,12 @@
-from .base import *
+# from .base import *
 
 from .production import *
 
-try:
-    from .local import *
-except:
-    pass
-
+# try:
+#     from .local import *
+# except:
+#     pass
+# 
 """
 what is __init__.py?
 https://stackoverflow.com/questions/448271/what-is-init-py-for
