@@ -44,7 +44,7 @@ class Question(models.Model):
     name = models.CharField(max_length=120)
     owner = models.ForeignKey(Profile)
     topic = models.ForeignKey(Topic)  # class_instance.model_set.all() # Django Models Unleashed JOINCFE.com
-    followers = models.ManyToManyField(User, related_name='is_followingQ', blank=True)  # user.is_following.all()
+    followers = models.ManyToManyField(User, related_name='is_following_question', blank=True)  # user.is_following.all()
     # following         = models.ManyToManyField(User, related_name='following', blank=True) # user.following.all()
     viewers = models.ManyToManyField(User, related_name='is_viewing_question', blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)

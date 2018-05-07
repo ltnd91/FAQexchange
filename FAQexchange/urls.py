@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 
 from django.contrib.auth.views import LoginView, LogoutView
 
-from profiles.views import ProfileFollowToggle, ProfileViewToggleQuestion, ProfileViewToggleFeedback, ProfileAjaxUpdateView
+from profiles.views import ProfileFollowToggle, ProfileViewToggleQuestion, ProfileViewToggleFeedback, ProfileAjaxUpdateView, RegisterView, activate_user_view
 from topics.views import TopicFollowToggle, TopicViewToggle, TopicAjaxCreateView
 from questions.views import QuestionFollowToggle, QuestionFollowToggleFeedback, QuestionAjaxCreateView, QuestionAjaxUpdateView, QuestionAjaxDeleteView
 from feedback.views import AnswerAjaxCreateView, AnswerFollowToggle, ReplyAnswerFollowToggle, AnswerAjaxUpdateView, AnswerAjaxDeleteView, CommentAjaxCreateView, CommentFollowToggle, CommentAjaxUpdateView, CommentAjaxDeleteView
@@ -13,6 +13,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
+    url(r'^register/$', RegisterView.as_view(), name='register'),
+    url(r'^activate/(?P<code>[a-z0-9].*)/$', activate_user_view, name='activate'),
     url(r'^profile-follow/$', ProfileFollowToggle.as_view(), name='followProfile'),
     url(r'^profile-view-question/$', ProfileViewToggleQuestion.as_view(), name='viewProfileQuestion'),
     url(r'^profile-view-feedback/$', ProfileViewToggleFeedback.as_view(), name='viewProfileFeedback'),

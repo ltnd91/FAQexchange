@@ -36,7 +36,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
         context = super(QuestionCreateView, self).get_context_data(*args, **kwargs)
         is_following_question = []
         for ques in Question.objects.all():
-            if ques in self.request.user.is_followingQ.all():
+            if ques in self.request.user.is_following_question.all():
                 is_following_question.append(ques)
         context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')

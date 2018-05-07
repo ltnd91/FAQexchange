@@ -12,9 +12,11 @@
 <body>
 {% include 'snippets/nav.html' %}
 
-
+{% if user.profile.activated or request.user.is_anonymous %}
 {% block content %}{% endblock content %}
-
+{% else %}
+<p> please use activation link sent to user.email </p>
+{% endif %}
 {% include "modal/modal.html" %}
 
 {% include 'snippets/js.html' %}

@@ -52,7 +52,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         is_following_profile = []
         is_following_question = []
         context['question'] = Question.objects.get(slug=self.kwargs.get("slug"))
-        if context['question'] in self.request.user.is_followingQ.all():
+        if context['question'] in self.request.user.is_following_question.all():
             is_following_question.append(context['question'])
         context['is_following_question'] = is_following_question
         is_viewing_question = Question.objects.filter(viewers=self.request.user)
@@ -62,7 +62,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         query = self.request.GET.get('q')
         qs = Answer.objects.search(query)
         if qs.exists():
-            context['answers'] = qs.filter(question=context['question']).order_by("-followers", "-updated").distinct()
+            context['answers'] = qs.filter(question=context['question']).order_by('-followers', '-updated').distinct()
             for ans in context['answers']:
                 if ans.owner not in is_following_profile:
                     is_following_profile.append(ans.owner)
@@ -71,7 +71,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
                     is_following_answer.append(ans)
                 if ans in self.request.user.is_replying_answer.all():
                     context['is_replying_answer'] = ans
-                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by("-followers", "-updated").distinct()
+                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by('-followers', '-updated').distinct()
                     for comm in context['is_viewing_comment']:
                         if comm.owner not in is_following_profile:
                             is_following_profile.append(comm.owner)
@@ -162,6 +162,7 @@ class AnswerAjaxCreateView(AjaxCreateView):
     def get_context_data(self, *args, **kwargs):
         context = super(AnswerAjaxCreateView, self).get_context_data(*args, **kwargs)
         context['title'] = 'Add Answer'
+        context['header'] = 'using name of an existing answer will be rejected'
         context['button_name'] = 'Add'
         return context
 

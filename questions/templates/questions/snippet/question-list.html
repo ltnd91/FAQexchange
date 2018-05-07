@@ -1,8 +1,26 @@
-{% if questions %}
-    <div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
+{% if question %}
+<div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
+    <div class='grid-item' style="text-align: left"> 
+        {% if question in is_following_question %}
+        <p>{% include 'forms/follow_form.html' with model_name=question is_following=True count=question.followers.count false_button='Unlike' true_button='Like' url_name=url_name button_color='btn-primary' %}</p>
+        {% else %}
+        <p>{% include 'forms/follow_form.html' with model_name=question is_following=False count=question.followers.count false_button='Unlike' true_button='Like' url_name=url_name button_color='btn-primary' %}</p>
+        {% endif %}
+        <p>{% if question in question_owner %} 
+              <a href="{% url 'questionEdit' pk=question.pk %}" class="modal-update" data-modal-head="" data-modal-callback="redirect" data-modal-target="{{ question.get_absolute_url }}" > <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'questionDelete' pk=question.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a>
+              {% else %}
+              from: <span class ="btn btn-success btn-sm"> {{ question.owner }} </span> 
+              {% endif %}
+            | topic: <span class ="btn btn-danger btn-sm"> {{ question.topic }} </span> 
+        </p>
+    </div>
+</div>
+{% else %}
+<div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
         <div class ='grid-item' style="text-align: left">
             <a href="{% url 'questionCreate' %}" class="modal-create" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-primary"> create a question</span> </a>
         </div>
+        {% if questions %}
         {% for ques in questions %}
         {% if ques.topic in user.is_viewing_topic.all or user.profile.showAllTopics %}
         {% if ques.owner in user.is_viewing_profile.all or user.profile.showAllUsers %}
@@ -23,24 +41,8 @@
         {% endif %}
         {% endif %}
         {% endfor %}
-    </div>
-{% elif question %}
-<div class='grid-container' style="border: 2px solid rgba(0, 0, 255, 1);grid-template-columns: auto">
-    <div class='grid-item' style="text-align: left"> 
-        {% if question in is_following_question %}
-        <p>{% include 'forms/follow_form.html' with model_name=question is_following=True count=question.followers.count false_button='Unlike' true_button='Like' url_name=url_name button_color='btn-primary' %}</p>
         {% else %}
-        <p>{% include 'forms/follow_form.html' with model_name=question is_following=False count=question.followers.count false_button='Unlike' true_button='Like' url_name=url_name button_color='btn-primary' %}</p>
+        <p class='lead'>No Questions Found</p>
         {% endif %}
-        <p>{% if question in question_owner %} 
-              <a href="{% url 'questionEdit' pk=question.pk %}" class="modal-update" data-modal-head="" data-modal-callback="redirect" data-modal-target="{{ question.get_absolute_url }}" > <span class ="btn btn-default btn-sm"> edit </span> </a> | <a href="{% url 'questionDelete' pk=question.pk %}" class="modal-delete" data-modal-head="" data-modal-callback="reload"> <span class ="btn btn-danger btn-sm"> delete </span> </a>
-              {% else %}
-              from: <span class ="btn btn-success btn-sm"> {{ question.owner }} </span> 
-              {% endif %}
-            | topic: <span class ="btn btn-danger btn-sm"> {{ question.topic }} </span> 
-        </p>
     </div>
-</div>
-{% else %}
-<p class='lead'>No Questions Found</p>
 {% endif %}

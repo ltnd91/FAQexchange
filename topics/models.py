@@ -62,4 +62,4 @@ class Topic(models.Model):
 
     def get_absolute_url(self):  # get_absolute_url
         # return f"/restaurants/{self.slug}"
-        return reverse('topics:create', args=[self.name])
+        return reverse('topics:create')

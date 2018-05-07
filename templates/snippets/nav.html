@@ -3,13 +3,13 @@
     <div class='grid-container' style='grid-template-columns: auto auto auto auto'>
         {% if request.user.is_authenticated %}
         <div class='grid-item' style="border: 2px solid rgba(255, 0, 0, 1)">
-            <a href='{% url "topics:create" username=request.user.username %}?q='>Topics</a>
+            <a href='{% url "topics:create" %}?q='>Topics</a>
         </div>
         <div class='grid-item' style="border: 2px solid rgba(0, 0, 255, 1)">
-            <a href='{% url "questions:create" username=request.user.username %}?q='>Questions</a>
+            <a href='{% url "questions:create" %}?q='>Questions</a>
         </div>
         <div class='grid-item' style="border: 2px solid rgba(0, 255, 0, 1)">
-            <a href='{% url "profiles:detail" username=request.user.username %}?q='>Users</a>
+            <a href='{% url "profiles:detail" %}?q='>Users</a>
         </div>
         <div class='grid-item' style="border: 2px solid rgba(0, 0, 0, 1)">
             <a href="{% url 'logout' %}">Logout</a>

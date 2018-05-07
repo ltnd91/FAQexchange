@@ -15,6 +15,12 @@ class AnswerCreateForm(forms.ModelForm):
             'question',
         ]
 
+    def clean_name(self):
+        name = self.cleaned_data.get("name")
+        if Answer.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError("Name already exist")
+        return name
+
     def __init__(self, slug=None, *args, **kwargs):
         # print(kwargs.pop('user'))
         print(kwargs)

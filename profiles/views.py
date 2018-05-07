@@ -9,22 +9,49 @@ from modal.views import AjaxUpdateView
 
 from .models import Profile
 from questions.models import Question
-from .forms import ProfileFilterForm
+from .forms import ProfileFilterForm, RegisterForm
 User = get_user_model()
+
+
+def activate_user_view(request, code=None, *args, **kwargs):
+    if code:
+        qs = Profile.objects.filter(activation_key=code)
+        if qs.exists() and qs.count() == 1:
+            profile = qs.first()
+            if not profile.activated:
+                user_ = profile.user
+                user_.is_active = True
+                user_.save()
+                profile.activated = True
+                profile.activation_key = None
+                profile.save()
+                return redirect("/login")
+    return redirect("/login")
+
+
+class RegisterView(CreateView):
+    form_class = RegisterForm
+    template_name = 'registration/register.html'
+    success_url = '/login/'
+
+    def dispatch(self, *args, **kwargs):
+        # if self.request.user.is_authenticated():
+        #     return redirect("/logout")
+        return super(RegisterView, self).dispatch(*args, **kwargs)
 
 
 class ProfileFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         username_to_toggle = request.POST.get("model_name")
         profile_, is_following = Profile.objects.toggle_follow_profile(request.user, username_to_toggle)
-        return redirect(f"/user/{request.user.username}/")
+        return redirect(f"/user/")
 
 
 class ProfileViewToggleQuestion(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         username_to_toggle = request.POST.get("model_name")
         profile_, is_following = Profile.objects.toggle_view_profile(request.user, username_to_toggle)
-        return redirect(f"/question/{request.user.username}/")
+        return redirect(f"/question/")
 
 
 class ProfileViewToggleFeedback(LoginRequiredMixin, View):
@@ -39,7 +66,7 @@ class ProfileDetailView(DetailView):
     template_name = 'profiles/user.html'
 
     def get_object(self):
-        username = self.kwargs.get("username")
+        username = self.request.user.username
         if username is None:
             raise Http404
         return get_object_or_404(User, username__iexact=username, is_active=True)
@@ -48,7 +75,7 @@ class ProfileDetailView(DetailView):
         context = super(ProfileDetailView, self).get_context_data(*args, **kwargs)
         is_following_profile = []
         for pro in Profile.objects.all():
-            if pro in self.request.user.is_following.all():
+            if pro in self.request.user.is_following_profile.all():
                 is_following_profile.append(pro)
         context['is_following_profile'] = is_following_profile
         query = self.request.GET.get('q')

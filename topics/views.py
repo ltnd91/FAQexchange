@@ -15,14 +15,14 @@ class TopicFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         topic_to_toggle = request.POST.get("model_name")
         topic_, is_following = Topic.objects.toggle_follow_toggle(request.user, topic_to_toggle)
-        return redirect(f"/topic/{request.user.username}/")
+        return redirect(f"/topic/")
 
 
 class TopicViewToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         topic_to_toggle = request.POST.get("model_name")
         topic_, is_following = Topic.objects.toggle_view_topic(request.user, topic_to_toggle)
-        return redirect(f"/question/{request.user.username}/")
+        return redirect(f"/question/")
 
 
 class TopicCreateView(LoginRequiredMixin, CreateView):
