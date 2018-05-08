@@ -62,7 +62,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
         query = self.request.GET.get('q')
         qs = Answer.objects.search(query)
         if qs.exists():
-            context['answers'] = qs.filter(question=context['question']).order_by('-followers', '-updated').distinct()
+            context['answers'] = qs.filter(question=context['question']).order_by('-followers', '-updated').distinct('name')
             for ans in context['answers']:
                 if ans.owner not in is_following_profile:
                     is_following_profile.append(ans.owner)
@@ -71,7 +71,7 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
                     is_following_answer.append(ans)
                 if ans in self.request.user.is_replying_answer.all():
                     context['is_replying_answer'] = ans
-                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by('-followers', '-updated').distinct()
+                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by('-followers', '-updated').distinct('name')
                     for comm in context['is_viewing_comment']:
                         if comm.owner not in is_following_profile:
                             is_following_profile.append(comm.owner)
