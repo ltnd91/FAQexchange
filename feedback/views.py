@@ -60,9 +60,14 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
             ques.viewers.remove(self.request.user)
         context['question'].viewers.add(self.request.user)
         query = self.request.GET.get('q')
-        qs = Answer.objects.search(query)
+        qs = Answer.objects.search(query).filter(question=context['question']).order_by('followers')
+        is_unique_answer = []
+        is_unique_comment = []
         if qs.exists():
-            context['answers'] = qs.filter(question=context['question']).order_by('-followers', '-updated','name').distinct('followers','updated','name')
+            for ans in qs:
+                if ans not in is_unique_answer:
+                    is_unique_answer.append(ans)
+            context['answers'] = is_unique_answer
             for ans in context['answers']:
                 if ans.owner not in is_following_profile:
                     is_following_profile.append(ans.owner)
@@ -71,7 +76,11 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
                     is_following_answer.append(ans)
                 if ans in self.request.user.is_replying_answer.all():
                     context['is_replying_answer'] = ans
-                    context['is_viewing_comment'] = Comment.objects.filter(answer=context['is_replying_answer']).order_by('-followers', '-updated','name').distinct('followers','updated','name')
+                    cs = Comment.objects.filter(answer=context['is_replying_answer']).order_by('followers')
+                    for comm in cs:
+                        if comm not in is_unique_comment:
+                            is_unique_comment.append(comm)
+                    context['is_viewing_comment'] = is_unique_comment
                     for comm in context['is_viewing_comment']:
                         if comm.owner not in is_following_profile:
                             is_following_profile.append(comm.owner)
