@@ -36,13 +36,13 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, *args, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(*args, **kwargs)
         is_following_question = []
-        is_unique_question = []
         for ques in Question.objects.all():
             if ques in self.request.user.is_following_question.all():
                 is_following_question.append(ques)
         context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')
         qs = Question.objects.search(query).order_by('followers')
+        is_unique_question = []
         for ques in qs:
             if ques not in is_unique_question:
                 is_unique_question.append(ques)
