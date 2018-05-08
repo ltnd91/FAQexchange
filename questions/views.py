@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import CreateView, DetailView, View
+import operator
 # Create your views here.
 
 from .models import Question
@@ -41,10 +42,11 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
                 is_following_question.append(ques)
         context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')
-        duplicateArray = Question.objects.search(query).order_by('followers')
-        for ques in duplicateArray:
+        qs = Question.objects.search(query).order_by('-followers')
+        for ques in qs:
             if ques not in is_unique_question:
                 is_unique_question.append(ques)
+        context['questions'] = is_unique_question
         context['profiles'] = Profile.objects.filter(followers=self.request.user)
         context['topics'] = Topic.objects.filter(followers=self.request.user)
         context['questions'] = is_unique_question
