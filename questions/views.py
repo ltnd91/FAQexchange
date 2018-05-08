@@ -35,17 +35,19 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, *args, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(*args, **kwargs)
         is_following_question = []
+        is_unique_question = []
         for ques in Question.objects.all():
             if ques in self.request.user.is_following_question.all():
                 is_following_question.append(ques)
         context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')
-        name_ids = Question.objects.search(query).order_by('followers')
-        qs = Question.objects.filter(id__in=name_ids).distinct('name').order_by('followers')
+        duplicateArray = Question.objects.search(query).order_by('followers')
+        for ques in duplicateArray:
+            if ques not in is_unique_question:
+                is_unique_question.append(ques)
         context['profiles'] = Profile.objects.filter(followers=self.request.user)
         context['topics'] = Topic.objects.filter(followers=self.request.user)
-        if qs.exists():
-            context['questions'] = qs
+        context['questions'] = is_unique_question
         context['question_owner'] = Question.objects.filter(owner=self.request.user.profile)
         context['is_following_profile_question'] = Profile.objects.filter(followers=self.request.user)
         return context
