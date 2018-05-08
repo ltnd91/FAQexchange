@@ -18,7 +18,7 @@ class QuestionFollowToggle(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         question_to_toggle = request.POST.get("model_name")
         question_, is_following = Question.objects.toggle_follow_question(request.user, question_to_toggle)
-        return redirect(f"/question/{request.user.username}/")
+        return redirect(f"/question/")
 
 
 class QuestionFollowToggleFeedback(LoginRequiredMixin, View):
