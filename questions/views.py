@@ -42,7 +42,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
                 is_following_question.append(ques)
         context['is_following_question'] = is_following_question
         query = self.request.GET.get('q')
-        qs = Question.objects.search(query).order_by('-followers')
+        qs = Question.objects.search(query).order_by('followers')
         for ques in qs:
             if ques not in is_unique_question:
                 is_unique_question.append(ques)
